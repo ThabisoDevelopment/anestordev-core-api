@@ -1,0 +1,28 @@
+{
+  "name": "authentication",
+  "version": "1.0.0",
+  "description": "This is an Authentication Service for all app that belong to AnestorDev.com",
+  "main": "index.js",
+  "scripts": {
+    "serve": "nodemon index.js"
+  },
+  "keywords": [
+    "Auth",
+    "JWT",
+    "API"
+  ],
+  "author": "Shabangu Thabiso",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "joi": "^17.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.2.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
