@@ -4,7 +4,8 @@
   "description": "This is an Authentication Service for all app that belong to AnestorDev.com",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon index.js"
+    "serve": "nodemon index.js",
+    "migrate": "node migrateTables.js"
   },
   "keywords": [
     "Auth",
