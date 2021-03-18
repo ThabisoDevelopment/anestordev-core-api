@@ -35,7 +35,17 @@ const validatePasswordResetPassword = data => {
     return schema.validate(data)
 }
 
+// PU - VALIDATE USER PROFILE WHEN UPDATING
+const validateUserUpdate = data => {
+    const schema = Joi.object({
+        name: Joi.string().required().min(3).max(50),
+        bio: Joi.string()
+    })
+    return schema.validate(data)
+}
+
 module.exports.validateRegistration = validateRegistration
 module.exports.validateLogin = validateLogin
 module.exports.validatePasswordResetEmail = validatePasswordResetEmail
 module.exports.validatePasswordResetPassword = validatePasswordResetPassword
+module.exports.validateUserUpdate = validateUserUpdate
