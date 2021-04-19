@@ -1,7 +1,7 @@
 const Joi = require('joi')
 
 // NEW USER DATA VALIDATION
-const validateRegistration = data => {
+const validateCreate = data => {
     const schema = Joi.object({
         name: Joi.string().required().min(3).max(50),
         email: Joi.string().required().min(5).email(),
@@ -20,7 +20,7 @@ const validateLogin = data => {
 }
 
 // POST - USER EMAIL PASSWORD RESET VALIDATION
-const validatePasswordResetEmail = data => {
+const validateEmail = data => {
     const schema = Joi.object({
         email: Joi.string().required().min(5).email(),
     })
@@ -28,24 +28,14 @@ const validatePasswordResetEmail = data => {
 }
 
 // PUT - USER PASSWORD RESET VALIDATION
-const validatePasswordResetPassword = data => {
+const validatePassword= data => {
     const schema = Joi.object({
         password: Joi.string().required().min(8),
     })
     return schema.validate(data)
 }
 
-// PU - VALIDATE USER PROFILE WHEN UPDATING
-const validateUserUpdate = data => {
-    const schema = Joi.object({
-        name: Joi.string().required().min(3).max(50),
-        bio: Joi.string()
-    })
-    return schema.validate(data)
-}
-
-module.exports.validateRegistration = validateRegistration
+module.exports.validateCreate = validateCreate
 module.exports.validateLogin = validateLogin
-module.exports.validatePasswordResetEmail = validatePasswordResetEmail
-module.exports.validatePasswordResetPassword = validatePasswordResetPassword
-module.exports.validateUserUpdate = validateUserUpdate
+module.exports.validateEmail = validateEmail
+module.exports.validatePassword = validatePassword

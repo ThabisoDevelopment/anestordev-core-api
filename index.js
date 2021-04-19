@@ -15,19 +15,15 @@ app.use(cors(corsOptions))
 app.use(express.json())
 
 // Importing Routes
-const login = require("./src/routes/login")
-const register = require("./src/routes/register")
-const passwordReset = require("./src/routes/passwordReset")
-const currentUser = require("./src/routes/currentUser")
+const authenticationRoutes = require("./src/routes/authentication")
+const userRoutes = require("./src/routes/user")
+const articleRoutes = require("./src/routes/articles")
 
 // Route Middleware
-app.use("/api/auth", login) /** Post Toute to Login */
-app.use("/api/auth", register) /** Post Route to Register */
-app.use("/api/auth", passwordReset) /** Password Reset have #POST and #PUT */
-app.use("/api/auth", currentUser) /** #GET and #PUT */
-
+app.use("/api/auth", authenticationRoutes)
+app.use("/api/users", userRoutes)
+app.use("/api/articles", articleRoutes)
 
 // Server Listening
 const PORT = process.env.PORT || 3000
 app.listen(PORT, ()=> console.log(`Server Running on port: ${PORT}`))
-

@@ -15,7 +15,7 @@ module.exports.verifyPasswordReset = (req, res, next) => {
 }
 
 // Token Verification Middleware
-module.exports.verifyUser = (req, res, next) => {
+module.exports.verify = (req, res, next) => {
     const token = req.header('authorization') || null
     if(!token) return res.status(401).send("Access Denied")
 

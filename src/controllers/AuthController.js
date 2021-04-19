@@ -1,0 +1,100 @@
+const connection = require('../database/connection')
+const bcrypt = require("bcryptjs")
+const jwt = require('jsonwebtoken')
+const { validateCreate, validateLogin, validatePassword, validateEmail } = require('../validation/AuthValidation')
+
+class AuthController {
+    // create new user
+    create(request, response) {
+        // Validate request body Input | name | email | password |
+        const { error } = validateCreate(request.body)
+        if (error) return response.status(203).send({ error: error.details[0].message })
+
+        // Check if email Exits
+        const statement = `SELECT * FROM users WHERE email=?`
+        connection.execute(statement, [ request.body.email ], async(error, results) => {
+            if (error) return response.status(500).send("Internal Server Error")
+            if (results.length > 0) return response.status(422).send("Sorry email already exists")
+
+            // Generate a Hashed Password
+            const salt = await bcrypt.genSalt(10)
+            const hashedPassword = await bcrypt.hash(request.body.password, salt)
+
+            // Register new user to Database
+            const data = [ 
+                request.body.name,
+                request.body.email,
+                hashedPassword
+            ]
+            const statement = `INSERT INTO users(name, email, password) VALUES(?, ?, ?)`
+            connection.execute(statement, data, (error) => {
+                if (error) return response.status(500).send("Internal Server Error")
+                response.status(201).send(`${request.body.name} your account have been created`)
+            })
+        })
+    }
+
+    login(request, response) {
+        // Login Validation request body | email | password |
+        const { error } = validateLogin(request.body)
+        if (error) return response.status(203).send({ error: error.details[0].message })
+
+        const statement = `SELECT id, email, password FROM users WHERE email=?`
+        connection.execute(statement, [ request.body.email ], async(error, results) => {
+            if (error) return response.status(500).send("Internal Server Error")
+            if (results.length < 1) return response.status(203).send({ error: "Email or password is invalid - email" })
+
+            // validate password
+            const user = results[0]
+            const validPass = await bcrypt.compare(request.body.password, user.password)
+            if(!validPass) return response.status(422).send("Email or password in invalid - password")
+            
+            // Create and Assign Token
+            // const token = jwt.sign({id: user.id}, process.env.JWT_SECRET, { expiresIn: '30s'})
+            const token = jwt.sign({id: user.id}, process.env.JWT_SECRET)
+            response.header('authorization', token).send({ token })
+        })
+    }
+
+    sendPasswordResetEmail(request, response) {
+        const { error } = validateEmail(request.body)
+        if (error) return response.status(203).send({ error:  error.details[0].message })
+
+        // Check if email Exits
+        const statement = `SELECT id, name, email FROM users WHERE email=?`
+        connection.execute(statement, [ request.body.email ], async(error, results) => {
+            if (error) return response.status(500).send("Internal Server Error")
+            if (results.length < 1) return response.status(203).send({ error: "Sorry! Pleace enter your correct email address" })
+            
+            const user = results[0]
+            const token = jwt.sign({id: user.id}, process.env.JWT_PASSWORD_RESET, { expiresIn: '60min'})
+
+            /**
+             * Sign a Password Reset JWT token and send an email to user
+             * jwt sing JWT_PASSWORD_RESET
+             */
+            response.send({"success": "password reset email sent", token})
+        })
+    }
+
+    async passwordReset(request, response) {
+        const { error } = validatePassword(request.body)
+        if (error) return response.status(203).send({ error: error.details[0].message })
+
+        // Generate a Hashed Password
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(request.body.password, salt)
+        const data = [ hashedPassword, request.user.id ]
+
+        const statement = `UPDATE users SET password=? WHERE id=?`
+        connection.execute(statement, data, (error) => {
+            if (error) return response.status(500).send("Internal Server Error")
+            /**
+             * Revoke Access token
+             */
+            response.send({ message: "Password Updated"})
+        })
+    }
+}
+
+module.exports = new AuthController
