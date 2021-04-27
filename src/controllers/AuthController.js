@@ -8,13 +8,13 @@ class AuthController {
     create(request, response) {
         // Validate request body Input | name | email | password |
         const { error } = validateCreate(request.body)
-        if (error) return response.status(203).send({ error: error.details[0].message })
+        if (error) return response.status(422).send({ message: error.details[0].message })
 
         // Check if email Exits
         const statement = `SELECT * FROM users WHERE email=?`
         connection.execute(statement, [ request.body.email ], async(error, results) => {
-            if (error) return response.status(500).send("Internal Server Error")
-            if (results.length > 0) return response.status(422).send("Sorry email already exists")
+            if (error) return response.status(500).send({ message: "Internal Server Error" })
+            if (results.length > 0) return response.status(422).send({ message: "Sorry email already exists" })
 
             // Generate a Hashed Password
             const salt = await bcrypt.genSalt(10)
@@ -28,8 +28,8 @@ class AuthController {
             ]
             const statement = `INSERT INTO users(name, email, password) VALUES(?, ?, ?)`
             connection.execute(statement, data, (error) => {
-                if (error) return response.status(500).send("Internal Server Error")
-                response.status(201).send(`${request.body.name} your account have been created`)
+                if (error) return response.status(500).send({ message: "Internal Server Error" })
+                response.status(201).send({ message:  `${request.body.name} your account have been created` })
             })
         })
     }
@@ -37,34 +37,38 @@ class AuthController {
     login(request, response) {
         // Login Validation request body | email | password |
         const { error } = validateLogin(request.body)
-        if (error) return response.status(203).send({ error: error.details[0].message })
+        if (error) return response.status(422).send({ message: error.details[0].message })
 
-        const statement = `SELECT id, email, password FROM users WHERE email=?`
+        const statement = `SELECT id, name, img_url, email, password FROM users WHERE email=?`
         connection.execute(statement, [ request.body.email ], async(error, results) => {
-            if (error) return response.status(500).send("Internal Server Error")
-            if (results.length < 1) return response.status(203).send({ error: "Email or password is invalid - email" })
+            if (error) return response.status(500).send({ message: "Internal Server Error" })
+            if (results.length < 1) return response.status(422).send({ message: "Email or password is invalid - email" })
 
             // validate password
-            const user = results[0]
-            const validPass = await bcrypt.compare(request.body.password, user.password)
-            if(!validPass) return response.status(422).send("Email or password in invalid - password")
+            const validPass = await bcrypt.compare(request.body.password, results[0].password)
+            if(!validPass) return response.status(422).send({ message: "Email or password is invalid - password" })
             
+            const user = {
+                id: results[0].id,
+                name: results[0].name,
+                img_url: results[0].img_url,
+            }
             // Create and Assign Token
             // const token = jwt.sign({id: user.id}, process.env.JWT_SECRET, { expiresIn: '30s'})
             const token = jwt.sign({id: user.id}, process.env.JWT_SECRET)
-            response.header('authorization', token).send({ token })
+            response.header('authorization', token).send({ token, user })
         })
     }
 
     sendPasswordResetEmail(request, response) {
         const { error } = validateEmail(request.body)
-        if (error) return response.status(203).send({ error:  error.details[0].message })
+        if (error) return response.status(422).send({ message: error.details[0].message })
 
         // Check if email Exits
         const statement = `SELECT id, name, email FROM users WHERE email=?`
         connection.execute(statement, [ request.body.email ], async(error, results) => {
-            if (error) return response.status(500).send("Internal Server Error")
-            if (results.length < 1) return response.status(203).send({ error: "Sorry! Pleace enter your correct email address" })
+            if (error) return response.status(500).send({ message: "Internal Server Error" })
+            if (results.length < 1) return response.status(404).send({ message: "Sorry! Pleace enter your correct email address" })
             
             const user = results[0]
             const token = jwt.sign({id: user.id}, process.env.JWT_PASSWORD_RESET, { expiresIn: '60min'})
@@ -73,13 +77,13 @@ class AuthController {
              * Sign a Password Reset JWT token and send an email to user
              * jwt sing JWT_PASSWORD_RESET
              */
-            response.send({"success": "password reset email sent", token})
+            response.send({ message: "password reset email sent", resetTokenTest: token })
         })
     }
 
     async passwordReset(request, response) {
         const { error } = validatePassword(request.body)
-        if (error) return response.status(203).send({ error: error.details[0].message })
+        if (error) return response.status(422).send({ message: error.details[0].message })
 
         // Generate a Hashed Password
         const salt = await bcrypt.genSalt(10)
@@ -88,11 +92,8 @@ class AuthController {
 
         const statement = `UPDATE users SET password=? WHERE id=?`
         connection.execute(statement, data, (error) => {
-            if (error) return response.status(500).send("Internal Server Error")
-            /**
-             * Revoke Access token
-             */
-            response.send({ message: "Password Updated"})
+            if (error) return response.status(500).send({ message: "Internal Server Error" })
+            response.send({ message: "Your password have been updated"})
         })
     }
 }

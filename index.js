@@ -20,7 +20,7 @@ const userRoutes = require("./src/routes/user")
 const articleRoutes = require("./src/routes/articles")
 
 // Route Middleware
-app.use("/api/auth", authenticationRoutes)
+app.use("/api/oauth", authenticationRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/articles", articleRoutes)
 
