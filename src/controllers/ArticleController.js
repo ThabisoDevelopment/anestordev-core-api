@@ -1,6 +1,6 @@
-const connection = require('../database/connection')
-const { authorized } = require("../middleware/authorization")
-const { validateCreate, validateUpdate } = require('../validation/ArticleValidation')
+import connection from '../database/connection'
+import { authorized } from "../middleware/authorization"
+import { validateCreate, validateUpdate } from '../validation/ArticleValidation'
 
 class ArticleController {
     async index(request, response) {
@@ -98,4 +98,4 @@ class ArticleController {
     }
 }
 
-module.exports = new ArticleController
+export default new ArticleController

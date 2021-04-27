@@ -1,5 +1,5 @@
-const connection = require('../database/connection')
-const { validateUser } = require("../validation/UserValidation")
+import connection from '../database/connection'
+import { validateUser } from "../validation/UserValidation"
 
 class UserController {
     // Get current Logged in user
@@ -37,4 +37,4 @@ class UserController {
 
 }
 
-module.exports = new UserController
+export default new UserController

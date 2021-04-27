@@ -1,4 +1,4 @@
-const Joi = require('joi')
+import Joi from 'joi'
 
 // CREATE ARTICLE VALIDATION FOR POST REQUEST
 const validateCreate = data => {
@@ -44,7 +44,11 @@ const validateSettingsArticle = data => {
     return schema.validate(data)
 }
 
-module.exports.validateCreate = validateCreate
-module.exports.validateUpdate = validateUpdate
-module.exports.validatePublishArticle = validatePublishArticle
-module.exports.validateSettingsArticle = validateSettingsArticle
+const _validateCreate = validateCreate
+export { _validateCreate as validateCreate }
+const _validateUpdate = validateUpdate
+export { _validateUpdate as validateUpdate }
+const _validatePublishArticle = validatePublishArticle
+export { _validatePublishArticle as validatePublishArticle }
+const _validateSettingsArticle = validateSettingsArticle
+export { _validateSettingsArticle as validateSettingsArticle }

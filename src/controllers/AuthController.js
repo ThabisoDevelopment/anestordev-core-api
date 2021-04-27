@@ -1,7 +1,7 @@
-const connection = require('../database/connection')
-const bcrypt = require("bcryptjs")
-const jwt = require('jsonwebtoken')
-const { validateCreate, validateLogin, validatePassword, validateEmail } = require('../validation/AuthValidation')
+import connection from '../database/connection'
+import { genSalt, hash, compare } from "bcryptjs"
+import { sign } from 'jsonwebtoken'
+import { validateCreate, validateLogin, validatePassword, validateEmail } from '../validation/AuthValidation'
 
 class AuthController {
     // create new user
@@ -17,8 +17,8 @@ class AuthController {
             if (results.length > 0) return response.status(422).send({ message: "Sorry email already exists" })
 
             // Generate a Hashed Password
-            const salt = await bcrypt.genSalt(10)
-            const hashedPassword = await bcrypt.hash(request.body.password, salt)
+            const salt = await genSalt(10)
+            const hashedPassword = await hash(request.body.password, salt)
 
             // Register new user to Database
             const data = [ 
@@ -45,7 +45,7 @@ class AuthController {
             if (results.length < 1) return response.status(422).send({ message: "Email or password is invalid - email" })
 
             // validate password
-            const validPass = await bcrypt.compare(request.body.password, results[0].password)
+            const validPass = await compare(request.body.password, results[0].password)
             if(!validPass) return response.status(422).send({ message: "Email or password is invalid - password" })
             
             const user = {
@@ -55,7 +55,7 @@ class AuthController {
             }
             // Create and Assign Token
             // const token = jwt.sign({id: user.id}, process.env.JWT_SECRET, { expiresIn: '30s'})
-            const token = jwt.sign({id: user.id}, process.env.JWT_SECRET)
+            const token = sign({id: user.id}, process.env.JWT_SECRET)
             response.header('authorization', token).send({ token, user })
         })
     }
@@ -71,7 +71,7 @@ class AuthController {
             if (results.length < 1) return response.status(404).send({ message: "Sorry! Pleace enter your correct email address" })
             
             const user = results[0]
-            const token = jwt.sign({id: user.id}, process.env.JWT_PASSWORD_RESET, { expiresIn: '60min'})
+            const token = sign({id: user.id}, process.env.JWT_PASSWORD_RESET, { expiresIn: '60min'})
 
             /**
              * Sign a Password Reset JWT token and send an email to user
@@ -86,8 +86,8 @@ class AuthController {
         if (error) return response.status(422).send({ message: error.details[0].message })
 
         // Generate a Hashed Password
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(request.body.password, salt)
+        const salt = await genSalt(10)
+        const hashedPassword = await hash(request.body.password, salt)
         const data = [ hashedPassword, request.user.id ]
 
         const statement = `UPDATE users SET password=? WHERE id=?`
@@ -98,4 +98,4 @@ class AuthController {
     }
 }
 
-module.exports = new AuthController
+export default new AuthController

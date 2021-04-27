@@ -1,7 +1,7 @@
-const jwt = require("jsonwebtoken")
+import jwt from "jsonwebtoken"
 
 // Token Verification Middleware for Password Reset
-module.exports.verifyPasswordReset = (req, res, next) => {
+export function verifyPasswordReset(req, res, next) {
     const token = req.header('authorization') || null
     if(!token) return res.status(401).send("Access Denied")
 
@@ -15,7 +15,7 @@ module.exports.verifyPasswordReset = (req, res, next) => {
 }
 
 // Token Verification Middleware
-module.exports.verify = (req, res, next) => {
+export function verify(req, res, next) {
     const token = req.header('authorization') || null
     if(!token) return res.status(401).send("Access Denied")
 

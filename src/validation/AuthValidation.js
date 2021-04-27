@@ -1,4 +1,4 @@
-const Joi = require('joi')
+import Joi from 'joi'
 
 // NEW USER DATA VALIDATION
 const validateCreate = data => {
@@ -35,7 +35,11 @@ const validatePassword= data => {
     return schema.validate(data)
 }
 
-module.exports.validateCreate = validateCreate
-module.exports.validateLogin = validateLogin
-module.exports.validateEmail = validateEmail
-module.exports.validatePassword = validatePassword
+const _validateCreate = validateCreate
+export { _validateCreate as validateCreate }
+const _validateLogin = validateLogin
+export { _validateLogin as validateLogin }
+const _validateEmail = validateEmail
+export { _validateEmail as validateEmail }
+const _validatePassword = validatePassword
+export { _validatePassword as validatePassword }

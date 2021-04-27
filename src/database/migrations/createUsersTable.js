@@ -1,4 +1,4 @@
-const connection = require("../connection")
+import connection from "../connection"
 
 const statement = `CREATE TABLE users(
 	id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -11,12 +11,13 @@ const statement = `CREATE TABLE users(
     updated_at TIMESTAMP DEFAULT NOW()
 )`
 
-const create_users_table = () => {
-    // check if table already exists then create table
-    connection.query(statement, error => {
-        if (error) return console.log(error.sqlMessage)
-        console.log("users table created")
-    })
+const create_users_table = async() => {
+    try {
+        const results = await connection.promise().query(existsQuery)
+        console.log(results)
+    } catch (error) {
+        console.error(error.message)
+    }
 }
 
-module.exports = create_users_table
+export default create_users_table

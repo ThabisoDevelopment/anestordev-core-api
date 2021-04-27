@@ -1,6 +1,6 @@
-require('dotenv/config')
-const express = require("express")
-const cors = require("cors")
+import 'dotenv/config'
+import express, { json } from "express"
+import cors from "cors"
 
 // Initializing or Starting Express Server
 const app = express()
@@ -12,12 +12,12 @@ const corsOptions = {
     optionsSuccessStatus: 200
 }
 app.use(cors(corsOptions))
-app.use(express.json())
+app.use(json())
 
 // Importing Routes
-const authenticationRoutes = require("./src/routes/authentication")
-const userRoutes = require("./src/routes/user")
-const articleRoutes = require("./src/routes/articles")
+import authenticationRoutes from "./routes/authentication"
+import userRoutes from "./routes/user"
+import articleRoutes from "./routes/articles"
 
 // Route Middleware
 app.use("/api/oauth", authenticationRoutes)

@@ -1,4 +1,4 @@
-const connection = require("../database/connection")
+import connection from "../database/connection"
 
 const authorized = async (request, tableName) => {
     try {
@@ -14,4 +14,5 @@ const authorized = async (request, tableName) => {
     }
 }
 
-module.exports.authorized = authorized
+const _authorized = authorized
+export { _authorized as authorized }
