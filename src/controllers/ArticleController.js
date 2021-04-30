@@ -1,6 +1,6 @@
 import connection from '../database/connection'
 import { authorized } from "../middleware/authorization"
-import { validateCreate, validateUpdate } from '../validation/ArticleValidation'
+import { validateCreate, validateUpdate, validateSettings } from '../validation/ArticleValidation'
 
 class ArticleController {
     async index(request, response) {
@@ -18,15 +18,23 @@ class ArticleController {
         try {
             const statement = "SELECT * FROM articles WHERE id=?"
             const articleResults = await connection.promise().query(statement, [ request.params.id ])
+            if (articleResults[0].length < 1) throw new Error('Sorry! this article does not exist anymore')
             const article = articleResults[0][0]
 
             const userStatement = "SELECT id, name, img_url FROM users WHERE id=?"
             const userResults = await connection.promise().query(userStatement, [ article.user_id ])
             const user = userResults[0][0]
             
-            // count views && likes && comments
-            const commentsStatement = "SELECT count(id) AS count FROM article_comments WHERE article_id=?"
-            const comments = await connection.promise().query(commentsStatement, [ article.user_id ])
+            const type = [ 'article', article.id ]
+            // count comment && likes && views
+            const commentsStatement = "SELECT count(id) AS count FROM comments WHERE type=? AND type_id=?"
+            const comments = await connection.promise().query(commentsStatement, type)
+
+            const likesStatement = "SELECT count(id) AS count FROM likes WHERE type=? AND type_id=?"
+            const likes = await connection.promise().query(likesStatement, type)
+
+            const viewsStatement = "SELECT count(id) AS count FROM views WHERE type=? AND type_id=?"
+            const views = await connection.promise().query(viewsStatement, type)
 
             const data = {
                 id: article.id,
@@ -41,8 +49,8 @@ class ArticleController {
                 created_at: article.created_at,
                 updated_at: article.updated_at,
                 comments: comments[0][0].count,
-                likes: 0,
-                views: 0,
+                likes: likes[0][0].count,
+                views: views[0][0].count,
                 user: {
                     id: user.id,
                     name: user.name,
@@ -94,6 +102,26 @@ class ArticleController {
         connection.query(statement, data, error => {
             if (error) return response.status(500).send({ message: "Internal Server Error" })
             response.send({ message: "Article Updated Successful" })
+        }) 
+    }
+    
+    async settings(request, response) {
+        const { error } = validateSettings(request.body)
+        if (error) return response.status(422).send({ message: error.details[0].message })
+        const isAuthorized = await authorized(request, 'articles')
+        if(!isAuthorized) return response.status(401).send({ message: "You are not authorized to update this article"})
+        // Update Article in Database
+        const data = [
+            request.body.likeble,
+            request.body.commentable,
+            request.body.contributable,
+            request.body.show_views,
+            request.params.id
+        ]
+        const statement = `UPDATE articles SET likable=?, commentable=?, contributable=?, show_views=? WHERE id=?`
+        connection.query(statement, data, error => {
+            if (error) return response.status(500).send({ message: error.message })
+            response.send({ message: "Article settigns updated" })
         }) 
     }
 }

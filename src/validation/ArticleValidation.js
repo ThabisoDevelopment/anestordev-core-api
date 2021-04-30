@@ -1,7 +1,7 @@
 import Joi from 'joi'
 
 // CREATE ARTICLE VALIDATION FOR POST REQUEST
-const validateCreate = data => {
+export const validateCreate = data => {
     const schema = Joi.object({
         title: Joi.string().required().min(3),
         description: Joi.string().required().min(3),
@@ -16,7 +16,7 @@ const validateCreate = data => {
 }
 
 // UPDATE ARTICLE VALIDATION FOR PUT REQUEST
-const validateUpdate = data => {
+export const validateUpdate = data => {
     const schema = Joi.object({
         title: Joi.string().required().min(3),
         description: Joi.string().required().min(3)
@@ -25,7 +25,7 @@ const validateUpdate = data => {
 }
 
 // PUBLISH ARTICLE VALIDATION FOR PUT REQUEST
-const validatePublishArticle = data => {
+export const validatePublish = data => {
     const schema = Joi.object({
         draft: Joi.required(),
         published: Joi.required(),
@@ -34,7 +34,7 @@ const validatePublishArticle = data => {
 }
 
 // SETTINGS ARTICLE VALIDATION FOR PUT REQUEST
-const validateSettingsArticle = data => {
+export const validateSettings = data => {
     const schema = Joi.object({
         likable: Joi.required(),
         commentable: Joi.required(),
@@ -43,12 +43,3 @@ const validateSettingsArticle = data => {
     })
     return schema.validate(data)
 }
-
-const _validateCreate = validateCreate
-export { _validateCreate as validateCreate }
-const _validateUpdate = validateUpdate
-export { _validateUpdate as validateUpdate }
-const _validatePublishArticle = validatePublishArticle
-export { _validatePublishArticle as validatePublishArticle }
-const _validateSettingsArticle = validateSettingsArticle
-export { _validateSettingsArticle as validateSettingsArticle }

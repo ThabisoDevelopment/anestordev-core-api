@@ -1,11 +1,11 @@
-USE noderestapi;
+use noderestapi;
 
 -- Create Users Table
 CREATE TABLE users(
 	id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     name VARCHAR(50) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
-    email_verified TINYINT default(1),
+    email_verified TINYINT default(0),
     password VARCHAR(255) NOT NULL,
     img_url TEXT,
     bio TEXT,
@@ -30,31 +30,35 @@ CREATE TABLE articles(
 );
 
 -- Create Article Comments Tables
-create table article_comments(
+create table comments(
 	id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     user_id INT NOT NULL,
-    article_id INT NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    type_id INT NOT NULL,
     comment TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
 );
 
 -- Create Article Likes Tables
-create table article_likes(
+create table likes(
 	id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     user_id INT NOT NULL,
-    article_id INT NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    type_id INT NOT NULL,
     liked TINYINT DEFAULT(1),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
 );
 
 -- Create Article Views Tables
-create table article_views(
+create table views(
 	id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     user_id INT NOT NULL,
-    article_id INT NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    type_id INT NOT NULL,
     viewed INT DEFAULT(1),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
 );
+
