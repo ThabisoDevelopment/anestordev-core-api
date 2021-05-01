@@ -100,7 +100,7 @@ class ArticleController {
         ]
         const statement = `UPDATE articles SET title=?, description=? WHERE id=?`
         connection.query(statement, data, error => {
-            if (error) return response.status(500).send({ message: "Internal Server Error" })
+            if (error) return response.status(500).send({ message: error.message })
             response.send({ message: "Article Updated Successful" })
         }) 
     }
