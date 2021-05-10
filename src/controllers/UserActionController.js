@@ -1,7 +1,7 @@
 import connection from '../database/connection'
 import { authorized } from '../middleware/authorization'
 
-class UtilsController {
+class UserActionController {
     
     // Like artcile || question || etc
     async like(request, response) {
@@ -55,39 +55,6 @@ class UtilsController {
         }
     }
 
-    async comment(request, response) {
-        const types = ['article', 'question']
-        if (!types.includes(request.body.type)) return response.status(400).send({ message: "comment type is not allowed"})
-        if (!request.body.comment) return response.status(422).send("comment message is required")
-        try {
-            const data = [
-                request.user.id,
-                request.body.type,
-                request.params.id,
-                request.body.comment
-            ]
-
-            const insertStatement = "INSERT INTO comments(user_id, type, type_id, comment) VALUES(?, ?, ?, ?)"
-            const results = await connection.promise().query(insertStatement, data)
-            response.status(201).send({ message: 'You have commented', id: results[0].insertId })
-        } catch (error) {
-            response.status(400).send({ message: error.message })
-        }
-    }
-
-    async destroyComment(request, response) {
-        try {
-            const isAuthorized = await authorized(request, 'comments')
-            if(!isAuthorized) throw new Error("Unauthorized to delete comment")
-            const statement = "DELETE FROM comments WHERE id=?"
-            await connection.promise().query(statement, [ request.params.id ])
-            response.status(200).send({ message: 'comment removed' })
-
-        } catch (error) {
-            response.status(400).send({ message: error.message })
-        }
-    }
-
 }
 
-export default new UtilsController
+export default new UserActionController

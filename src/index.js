@@ -18,11 +18,13 @@ app.use(json())
 import authenticationRoutes from "./routes/authentication"
 import userRoutes from "./routes/user"
 import articleRoutes from "./routes/articles"
+import commentRoutes from "./routes/comments"
 
 // Route Middleware
 app.use("/api/oauth", authenticationRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/articles", articleRoutes)
+app.use("/api/comments", commentRoutes)
 
 // Server Listening
 const PORT = process.env.PORT || 3000

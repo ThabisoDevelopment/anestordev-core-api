@@ -24,6 +24,8 @@ class ArticleController {
             const userStatement = "SELECT id, name, img_url FROM users WHERE id=?"
             const userResults = await connection.promise().query(userStatement, [ article.user_id ])
             const user = userResults[0][0]
+            user.authorized = false
+            if (request.user && request.user.id == article.user_id) user.authorized = true
             
             const type = [ 'article', article.id ]
             // count comment && likes && views
@@ -54,7 +56,8 @@ class ArticleController {
                 user: {
                     id: user.id,
                     name: user.name,
-                    img_url: user.img_url
+                    img_url: user.img_url,
+                    authorized: user.authorized
                 }
             }
             response.send(data)
