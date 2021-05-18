@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import express, { json } from "express"
 import cors from "cors"
+import Token from './middleware/Token'
 
 // Initializing or Starting Express Server
 const app = express()
@@ -13,6 +14,7 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 app.use(json())
+app.use(Token.verify)
 
 // Importing Routes
 import authenticationRoutes from "./routes/authentication"

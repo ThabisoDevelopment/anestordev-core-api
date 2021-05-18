@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import UserController from '../controllers/UserController'
-import { verify } from '../middleware/verifyToken'
+import Token from '../middleware/Token'
 
 const router = Router()
 
 // Get User Profile
-router.get("/current", verify, UserController.current)
-router.put("/update", verify, UserController.update)
+router.get("/current", Token.authenticated, UserController.current)
+router.put("/update", Token.authenticated, UserController.update)
 
 
 

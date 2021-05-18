@@ -1,9 +1,9 @@
-import express from 'express'
-import { verify } from '../middleware/verifyToken';
+import { Router } from 'express'
 import CommentController from '../controllers/CommentController';
+import Token from '../middleware/Token';
 
 
-const router = express.Router()
+const router = Router()
  /**
   *  ID Param is a type_id
   *  GET requires query type=article || type=question
@@ -11,8 +11,8 @@ const router = express.Router()
   *  DELETE req ID is a comment original id
   */
 router.get("/:id", CommentController.all)
-router.post("/:id", verify, CommentController.comment)
-router.delete("/:id", verify, CommentController.destroyComment) /** ID is Comment ID */
+router.post("/:id", Token.authenticated, CommentController.comment)
+router.delete("/:id", Token.authenticated, CommentController.destroyComment) /** ID is Comment ID */
 
 
 // router.post("/comments/reply/:id", verify, C.comment)

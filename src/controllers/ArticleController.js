@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import connection from '../database/connection'
 import { authorized } from "../middleware/authorization"
 import { validateCreate, validateUpdate, validateSettings } from '../validation/ArticleValidation'
@@ -5,14 +6,15 @@ import { validateCreate, validateUpdate, validateSettings } from '../validation/
 class ArticleController {
     async index(request, response) {
         try {
-            const statement = "SELECT * FROM articles LIMIT 10"
-            const results = await connection.promise().query(statement)
-            const data = results[0]
-            response.send(data)
+            const statement = "SELECT * FROM articles WHERE published=1 LIMIT 10"
+            const articles = await connection.promise().query(statement)
+            response.send(articles[0])
         } catch (error) {
-            response.status(500).send({ message: "Internal Server Error" })
+            response.status(500).send({ message: error.message })
         }
     }
+
+    
 
     async getById(request, response) {
         try {
@@ -48,8 +50,8 @@ class ArticleController {
                 commentable: article.commentable,
                 contributable: article.contributable,
                 show_views: article.show_views,
-                created_at: article.created_at,
-                updated_at: article.updated_at,
+                created_at: dayjs(article.created_at).format("DD-MMM-YYYY HH:mm"),
+                updated_at: dayjs(article.updated_at).format('DD-MMM-YYYY HH:mm'),
                 comments: comments[0][0].count,
                 likes: likes[0][0].count,
                 views: views[0][0].count,
@@ -60,6 +62,7 @@ class ArticleController {
                     authorized: user.authorized
                 }
             }
+
             response.send(data)
         } catch (error) {
             response.status(500).send({ message: error.message })
