@@ -21,12 +21,15 @@ import authenticationRoutes from "./routes/authentication"
 import userRoutes from "./routes/user"
 import articleRoutes from "./routes/articles"
 import commentRoutes from "./routes/comments"
+import fileRoutes from "./routes/files"
 
 // Route Middleware
 app.use("/api/oauth", authenticationRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/articles", articleRoutes)
 app.use("/api/comments", commentRoutes)
+
+app.use("/api/file", fileRoutes)
 
 // Server Listening
 const PORT = process.env.PORT || 3000
