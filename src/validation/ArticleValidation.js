@@ -11,6 +11,7 @@ export const validateCreate = data => {
         commentable: Joi.required(),
         contributable: Joi.required(),
         show_views: Joi.required(),
+        content: Joi.array()
     })
     return schema.validate(data)
 }

@@ -1,27 +1,32 @@
 import dayjs from 'dayjs'
 import connection from '../database/connection'
 import { authorized } from "../middleware/authorization"
+import { queryLatest } from '../statements/ArticleModel'
 import { validateCreate, validateUpdate, validateSettings } from '../validation/ArticleValidation'
 
 class ArticleController {
     async index(request, response) {
         try {
-            const statement = "SELECT * FROM articles WHERE published=1 LIMIT 10"
-            const articles = await connection.promise().query(statement)
-            response.send(articles[0])
+            const statement = queryLatest
+            const { [0]: articles } = await connection.promise().query(statement)
+            articles.forEach(async article => {
+                article.content = JSON.parse(article.content)
+                article.created_at = dayjs(article.created_at).format("DD-MMM-YYYY HH:mm")
+                article.updated_at = dayjs(article.updated_at).format("DD-MMM-YYYY HH:mm")
+                return article
+            })
+            response.send(articles)
         } catch (error) {
             response.status(500).send({ message: error.message })
         }
     }
 
-    
-
     async getById(request, response) {
         try {
             const statement = "SELECT * FROM articles WHERE id=?"
-            const articleResults = await connection.promise().query(statement, [ request.params.id ])
-            if (articleResults[0].length < 1) throw new Error('Sorry! this article does not exist anymore')
-            const article = articleResults[0][0]
+            const { [0]: articleResults } = await connection.promise().query(statement, [ request.params.id ])
+            if (articleResults.length < 1) throw new Error('Sorry! this article does not exist anymore')
+            const article = articleResults[0]
 
             const userStatement = "SELECT id, name, img_url FROM users WHERE id=?"
             const userResults = await connection.promise().query(userStatement, [ article.user_id ])
@@ -44,6 +49,7 @@ class ArticleController {
                 id: article.id,
                 title: article.title,
                 description: article.description,
+                content: JSON.parse(article.content),
                 draft: article.draft,
                 published: article.published,
                 likable: article.likable,
@@ -62,7 +68,6 @@ class ArticleController {
                     authorized: user.authorized
                 }
             }
-
             response.send(data)
         } catch (error) {
             response.status(500).send({ message: error.message })
@@ -73,6 +78,7 @@ class ArticleController {
         const { error } = validateCreate(request.body)
         if (error) return response.status(422).send({ message: error.details[0].message })
         // Add New Article To Database
+        const content = JSON.stringify(request.body.content)    
         const data = [
             request.user.id,
             request.body.title,
@@ -82,13 +88,14 @@ class ArticleController {
             request.body.likable,
             request.body.commentable,
             request.body.contributable,
-            request.body.show_views
+            request.body.show_views,
+            content
         ]
         const statement = `INSERT INTO 
-                articles(user_id, title, description, draft, published, likable, commentable, contributable, show_views)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                articles(user_id, title, description, draft, published, likable, commentable, contributable, show_views, content)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         connection.execute(statement, data, (error, results) => {
-            if (error) return response.status(500).send({ message: "Internal Server Error" })
+            if (error) return response.status(500).send({ message: error.message })
             response.status(201).send({ message: "Article Created Successfuly", id: results.insertId })
         })
     }
